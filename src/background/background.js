@@ -1,5 +1,6 @@
 import { createVideoUrlStore } from './videoUrlStore.js';
 import { isVideoRequestUrl } from './videoRequestMatcher.js';
+import { buildDownloadFilename } from '../shared/downloadUtils.js';
 import { MessageType, MessageTarget } from '../shared/messages.js';
 
 const videoUrlStore = createVideoUrlStore();
@@ -29,6 +30,21 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     const tabId = sender.tab?.id;
     sendResponse({ url: tabId != null ? videoUrlStore.getVideoUrl(tabId) : null });
     return false;
+  }
+
+  if (message.type === MessageType.DOWNLOAD_VIDEO) {
+    const tabId = sender.tab?.id;
+    const url = tabId != null ? videoUrlStore.getVideoUrl(tabId) : null;
+
+    if (!url) {
+      sendResponse({ success: false, error: 'NO_VIDEO_URL' });
+      return false;
+    }
+
+    chrome.downloads.download({ url, filename: buildDownloadFilename() }, () => {
+      sendResponse({ success: !chrome.runtime.lastError, error: chrome.runtime.lastError?.message });
+    });
+    return true;
   }
 
   return false;

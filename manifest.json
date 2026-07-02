@@ -3,7 +3,7 @@
   "name": "IG/TikTok Transcriptor y Descargador",
   "version": "0.1.0",
   "description": "Transcribe y descarga videos de Instagram y TikTok directamente desde el feed.",
-  "permissions": ["webRequest"],
+  "permissions": ["webRequest", "downloads"],
   "host_permissions": [
     "*://*.instagram.com/*",
     "*://*.cdninstagram.com/*",
