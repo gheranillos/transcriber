@@ -36,16 +36,19 @@ export async function decodeVideoToPCM16kMono(videoUrl) {
   const arrayBuffer = await response.arrayBuffer();
 
   const audioContext = new AudioContext();
-  const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+  let resampled;
+  try {
+    const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
 
-  const channelData = [];
-  for (let ch = 0; ch < audioBuffer.numberOfChannels; ch++) {
-    channelData.push(audioBuffer.getChannelData(ch));
+    const channelData = [];
+    for (let ch = 0; ch < audioBuffer.numberOfChannels; ch++) {
+      channelData.push(audioBuffer.getChannelData(ch));
+    }
+
+    const mono = toMonoFloat32(channelData);
+    resampled = resamplePCM(mono, audioBuffer.sampleRate, 16000);
+  } finally {
+    await audioContext.close();
   }
-
-  const mono = toMonoFloat32(channelData);
-  const resampled = resamplePCM(mono, audioBuffer.sampleRate, 16000);
-
-  await audioContext.close();
   return resampled;
 }
