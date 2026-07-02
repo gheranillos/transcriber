@@ -1,0 +1,14 @@
+.ittx-button-row {
+  display: inline-flex;
+  gap: 8px;
+  margin-left: 8px;
+}
+
+.ittx-icon-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+  line-height: 1;
+  padding: 4px;
+}

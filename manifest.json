@@ -1,0 +1,18 @@
+{
+  "manifest_version": 3,
+  "name": "IG/TikTok Transcriptor y Descargador",
+  "version": "0.1.0",
+  "description": "Transcribe y descarga videos de Instagram y TikTok directamente desde el feed.",
+  "background": {
+    "service_worker": "dist/background.js",
+    "type": "module"
+  },
+  "content_scripts": [
+    {
+      "matches": ["*://*.instagram.com/*", "*://*.tiktok.com/*"],
+      "js": ["dist/content.js"],
+      "css": ["styles/content.css"],
+      "run_at": "document_idle"
+    }
+  ]
+}
