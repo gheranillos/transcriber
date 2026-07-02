@@ -23,15 +23,24 @@ chrome.webRequest.onBeforeRequest.addListener(
   },
 );
 
-async function ensureOffscreenDocument() {
-  const hasDocument = await chrome.offscreen.hasDocument();
-  if (hasDocument) return;
+let creatingOffscreenDocument = null;
 
-  await chrome.offscreen.createDocument({
-    url: 'offscreen.html',
-    reasons: ['WORKERS'],
-    justification: 'Ejecutar el modelo de transcripción Whisper vía WebAssembly.',
-  });
+async function ensureOffscreenDocument() {
+  if (await chrome.offscreen.hasDocument()) return;
+
+  if (!creatingOffscreenDocument) {
+    creatingOffscreenDocument = chrome.offscreen
+      .createDocument({
+        url: 'offscreen.html',
+        reasons: ['WORKERS'],
+        justification: 'Ejecutar el modelo de transcripción Whisper vía WebAssembly.',
+      })
+      .finally(() => {
+        creatingOffscreenDocument = null;
+      });
+  }
+
+  await creatingOffscreenDocument;
 }
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
@@ -60,15 +69,23 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
   if (message.type === MessageType.TRANSCRIBE_AUDIO) {
     const tabId = sender.tab?.id;
-    ensureOffscreenDocument().then(() => {
-      chrome.runtime.sendMessage({
-        target: MessageTarget.OFFSCREEN,
-        type: MessageType.TRANSCRIBE_AUDIO,
-        audio: message.audio,
-        requestId: message.requestId,
-        tabId,
+    ensureOffscreenDocument()
+      .then(() => {
+        chrome.runtime.sendMessage({
+          target: MessageTarget.OFFSCREEN,
+          type: MessageType.TRANSCRIBE_AUDIO,
+          audio: message.audio,
+          requestId: message.requestId,
+          tabId,
+        });
+      })
+      .catch((error) => {
+        chrome.tabs.sendMessage(tabId, {
+          type: MessageType.TRANSCRIBE_ERROR,
+          requestId: message.requestId,
+          message: error?.message ?? String(error),
+        });
       });
-    });
     return false;
   }
 
