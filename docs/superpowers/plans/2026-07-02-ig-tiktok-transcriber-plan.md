@@ -1058,7 +1058,7 @@ Expected: `Build complete.`, `dist/offscreen.js` now exists (this file will be l
 2. Abrí Instagram, reproducí un Reel para que se capture su URL (paso del Task 3).
 3. Desde la consola de la pestaña de Instagram, tomá el audio de prueba y disparalo manualmente:
    ```js
-   chrome.runtime.sendMessage({ target: 'background', type: 'TRANSCRIBE_AUDIO', audio: new Array(16000).fill(0) }, console.log);
+   chrome.runtime.sendMessage({ target: 'background', type: 'TRANSCRIBE_AUDIO', audio: new Array(16000).fill(0), requestId: 'manual-test' }, console.log);
    ```
 4. En `chrome://extensions`, click "Inspeccionar vistas: offscreen.html" para ver su consola.
 5. Confirmá que no hay errores de CORS/CSP al descargar el modelo (primera vez puede tardar 30-60s por los ~150MB). Si ves un error de red bloqueada, anotá el dominio exacto y agregalo a `host_permissions`.
