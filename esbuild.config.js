@@ -3,6 +3,7 @@ import { build } from 'esbuild';
 const targets = [
   { name: 'background', entry: 'src/background/background.js', format: 'esm' },
   { name: 'content', entry: 'src/content/content.js', format: 'iife' },
+  { name: 'offscreen', entry: 'src/offscreen/offscreen.js', format: 'esm' },
 ];
 
 for (const target of targets) {
